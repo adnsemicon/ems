@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 const ASSIGNED_ISSUES_URL =
-  'https://github.com/issues/assigned?q=is%3Aissue+state%3Aopen+archived%3Afalse+assignee%3A%40me+sort%3Aupdated-desc+org%3AADN-VLSI';
+  'https://github.com/issues/assigned?q=is%3Aissue+state%3Aopen+archived%3Afalse+assignee%3A%40me+sort%3Aupdated-desc+org%3Aadnsemicon';
 
 interface AssignedIssuesProps {
   issues: GitHubIssueItem[];

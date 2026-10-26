@@ -111,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
               </div>
             ) : (
               <a
-                href="https://github.com/ADN-VLSI/ems"
+                href="https://github.com/adnsemicon/ems"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900"

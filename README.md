@@ -126,7 +126,7 @@ When GitHub App credentials are configured, the system connects to GitHub via a 
 - An issue can belong to multiple tracking boards; all associated boards are displayed.
 - **1-Click Integration:** Employees can click `+ Today's Task` or `+ Plan` directly on any issue card to immediately append it to their update form!
 - Zero personal access tokens (PATs) are requested from employees.
-- The issue panel links directly to [ADN-VLSI open issues assigned to you](https://github.com/issues/assigned?q=is%3Aissue+state%3Aopen+archived%3Afalse+assignee%3A%40me+sort%3Aupdated-desc+org%3AADN-VLSI). If the GitHub App issue sync is unavailable, the panel does not display fabricated demo issues.
+- The issue panel links directly to [adnsemicon open issues assigned to you](https://github.com/issues/assigned?q=is%3Aissue+state%3Aopen+archived%3Afalse+assignee%3A%40me+sort%3Aupdated-desc+org%3Aadnsemicon). If the GitHub App issue sync is unavailable, the panel does not display fabricated demo issues.
 - Without those App credentials, employees can still open their live assigned issue list on GitHub; issue cards and project-board details are unavailable in EMS.
 
 ---

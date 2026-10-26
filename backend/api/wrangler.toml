@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 APP_TIMEZONE = "Asia/Dhaka"
-FRONTEND_URL = "https://adn-vlsi.github.io/ems"
+FRONTEND_URL = "https://adnsemicon.github.io/ems"
 DEV_SIGN_IN_ENABLED = "false"
 COMPANY_REPORT_TO = "foez.ahmed@adnsemicon.com"
 COMPANY_REPORT_CC = "mohiuddin.reyad@adnsemicon.com,farhan.efty@adnsemicon.com"

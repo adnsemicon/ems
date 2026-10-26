@@ -216,7 +216,7 @@ export async function fetchAssignedIssues(
     }
   `;
 
-  const searchQuery = 'org:ADN-VLSI is:open is:issue archived:false sort:updated-desc';
+  const searchQuery = 'org:adnsemicon is:open is:issue archived:false sort:updated-desc';
   const rawIssues: any[] = [];
   let cursor: string | null = null;
   let rateLimitRemaining: number | undefined;
