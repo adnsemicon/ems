@@ -4,8 +4,8 @@ import { LogOut, Users, Shield, Cpu, Github, ExternalLink } from 'lucide-react';
 
 interface HeaderProps {
   user: Employee | null;
-  activeTab: 'update' | 'team' | 'admin';
-  setActiveTab: (tab: 'update' | 'team' | 'admin') => void;
+  activeTab: 'update' | 'team' | 'admin' | 'policies';
+  setActiveTab: (tab: 'update' | 'team' | 'admin' | 'policies') => void;
   onLogout: () => void;
 }
 
@@ -31,8 +31,9 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
           </div>
 
           {/* Navigation Tabs */}
-          {user && (
-            <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
+          <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
+              {user && (
+                <>
               <button
                 onClick={() => setActiveTab('update')}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -67,8 +68,19 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
                   Manage Users
                 </button>
               )}
-            </nav>
-          )}
+                </>
+              )}
+              <button
+                onClick={() => setActiveTab('policies')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'policies'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                Policies
+              </button>
+          </nav>
 
           {/* User Profile / Logout */}
           <div className="flex items-center gap-3">
@@ -125,8 +137,9 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
         </div>
 
         {/* Mobile Nav Tabs */}
-        {user && (
-          <div className="flex md:hidden overflow-x-auto py-2 border-t border-slate-100 space-x-1">
+        <div className="flex md:hidden overflow-x-auto py-2 border-t border-slate-100 space-x-1">
+            {user && (
+              <>
             <button
               onClick={() => setActiveTab('update')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap ${
@@ -155,8 +168,17 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
                 Manage Users
               </button>
             )}
-          </div>
-        )}
+              </>
+            )}
+            <button
+              onClick={() => setActiveTab('policies')}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap ${
+                activeTab === 'policies' ? 'bg-adn-600 text-white' : 'text-slate-600 bg-slate-100'
+              }`}
+            >
+              Policies
+            </button>
+        </div>
       </div>
     </header>
   );

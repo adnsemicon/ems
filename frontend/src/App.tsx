@@ -8,6 +8,7 @@ import { AssignedIssues } from './components/AssignedIssues';
 import { TeamOverview } from './components/TeamOverview';
 import { LoginView } from './components/LoginView';
 import { AdminUserManagement } from './components/AdminUserManagement';
+import { Policies } from './components/Policies';
 
 export function App() {
   const [user, setUser] = useState<Employee | null>(null);
@@ -22,7 +23,7 @@ export function App() {
   } | null>(null);
   const [managerTeamError, setManagerTeamError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'update' | 'team' | 'admin'>('update');
+  const [activeTab, setActiveTab] = useState<'update' | 'team' | 'admin' | 'policies'>('update');
   const [loading, setLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [issuesLoading, setIssuesLoading] = useState<boolean>(false);
@@ -174,7 +175,9 @@ export function App() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {!user ? (
+        {activeTab === 'policies' ? (
+          <Policies />
+        ) : !user ? (
           <LoginView onSuccess={loadUserData} />
         ) : (
           <>

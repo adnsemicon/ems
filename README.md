@@ -62,10 +62,14 @@ The entire system is architected to operate on **100% ongoing free tiers**, with
 ```text
 ├── frontend/             # Static SPA deployed to GitHub Pages (React + Vite + Tailwind)
 │   ├── src/
-│   │   ├── components/   # DeadlineBanner, UpdateForm, AssignedIssues, TeamOverview, etc.
+│   │   ├── components/   # Policy view and employee, team, and admin UI
 │   │   ├── api.ts        # Cloudflare Worker API client
 │   │   └── App.tsx       # State coordination and tab navigation
+│   ├── public/favicon.ico # Site favicon
 │   └── vite.config.ts    # Configured for GitHub Pages relative asset paths
+├── policies/             # Individual career progression and leave policies
+├── scripts/
+│   └── test_localhost.py  # Local frontend and API smoke test
 ├── backend/
 │   └── api/              # Cloudflare Worker API & D1 integration
 │       ├── schema.sql    # D1 SQLite database tables & indices
@@ -222,14 +226,17 @@ In your GitHub repository, navigate to **Settings > Secrets and variables > Acti
 npx tsx shared/test-runner.mjs
 
 # Start frontend dev server (http://localhost:5173)
-cd frontend
-npm install
-npm run dev
+npm --prefix frontend install
+npm run dev:frontend
 
 # Start worker dev server (http://localhost:8787)
-cd ../backend/api
-npm install
-npm run dev
+npm --prefix backend/api install
+npm run dev:worker
+
+# In a third terminal, smoke-test the local frontend and API
+python scripts/test_localhost.py
 ```
 
 During local development, you can use the **Dev Sign-In** button on the login screen to sign in as any employee without needing to register OAuth applications.
+
+The localhost smoke test checks the frontend page, the served `favicon.ico`, and the worker's health and deadline-status endpoints. Use `--frontend-url` or `--api-url` to test different local ports.
