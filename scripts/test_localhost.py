@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke-test the local EMS frontend, favicon, and API."""
+"""Smoke-test the local EMS frontend, official icon, and API."""
 
 import argparse
 import json
@@ -32,14 +32,14 @@ def main() -> int:
         html = get(frontend_url).decode("utf-8")
         if "Employee Daily Updates | ADN Semiconductor" not in html:
             raise RuntimeError("Frontend response does not contain the expected EMS page title.")
-        if 'href="./favicon.ico"' not in html:
-            raise RuntimeError("Frontend page does not reference the favicon.ico file.")
+        if 'href="./icon.png"' not in html:
+            raise RuntimeError("Frontend page does not reference the official icon.png file.")
         print("PASS frontend page")
 
-        favicon = get(urljoin(frontend_url, "favicon.ico"))
-        if not favicon.startswith(b"\x00\x00\x01\x00"):
-            raise RuntimeError("The served favicon is not a valid ICO file.")
-        print("PASS favicon.ico")
+        icon = get(urljoin(frontend_url, "icon.png"))
+        if not icon.startswith(b"\x89PNG\r\n\x1a\n"):
+            raise RuntimeError("The served icon.png is not a valid PNG file.")
+        print("PASS official icon")
 
         health = json.loads(get(urljoin(api_url, "api/health")).decode("utf-8"))
         if health.get("status") != "ok":

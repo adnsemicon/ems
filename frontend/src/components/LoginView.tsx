@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Github, Shield, Cpu } from 'lucide-react';
+import { Github, Shield } from 'lucide-react';
 import { api } from '../api';
 
 interface LoginViewProps {
@@ -37,9 +37,12 @@ export const LoginView: React.FC<LoginViewProps> = () => {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-3xl border border-slate-200/90 shadow-lg">
         {/* Logo and title */}
         <div className="text-center space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-adn-600 to-adn-800 text-white flex items-center justify-center mx-auto shadow-md shadow-adn-600/30">
-            <Cpu className="w-8 h-8" />
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}icon.png`}
+            alt=""
+            aria-hidden="true"
+            className="w-14 h-14 rounded-2xl object-contain mx-auto shadow-sm"
+          />
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             ADN Semiconductor
           </h2>

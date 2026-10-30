@@ -1,6 +1,6 @@
 import React from 'react';
 import { Employee } from '@shared/types';
-import { LogOut, Users, Shield, Cpu, Github, ExternalLink } from 'lucide-react';
+import { LogOut, Users, Shield, Github, ExternalLink } from 'lucide-react';
 
 interface HeaderProps {
   user: Employee | null;
@@ -16,9 +16,12 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
         <div className="flex items-center justify-between h-16">
           {/* Logo & Company branding */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-adn-600 to-adn-800 flex items-center justify-center text-white shadow-md shadow-adn-600/20">
-              <Cpu className="w-5 h-5" />
-            </div>
+            <img
+              src={`${import.meta.env.BASE_URL}icon.png`}
+              alt=""
+              aria-hidden="true"
+              className="w-10 h-10 rounded-xl object-contain shadow-sm"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-900 tracking-tight">ADN Semiconductor</span>

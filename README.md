@@ -65,7 +65,7 @@ The entire system is architected to operate on **100% ongoing free tiers**, with
 │   │   ├── components/   # Policy view and employee, team, and admin UI
 │   │   ├── api.ts        # Cloudflare Worker API client
 │   │   └── App.tsx       # State coordination and tab navigation
-│   ├── public/favicon.ico # Site favicon
+│   ├── public/icon.png    # Official site and app icon
 │   └── vite.config.ts    # Configured for GitHub Pages relative asset paths
 ├── policies/             # Individual career progression and leave policies
 ├── scripts/
@@ -239,4 +239,4 @@ python scripts/test_localhost.py
 
 During local development, you can use the **Dev Sign-In** button on the login screen to sign in as any employee without needing to register OAuth applications.
 
-The localhost smoke test checks the frontend page, the served `favicon.ico`, and the worker's health and deadline-status endpoints. Use `--frontend-url` or `--api-url` to test different local ports.
+The localhost smoke test checks the frontend page, the served `icon.png`, and the worker's health and deadline-status endpoints. Use `--frontend-url` or `--api-url` to test different local ports.
