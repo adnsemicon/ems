@@ -124,6 +124,7 @@ export function App() {
     setManagerTeamError(null);
     setTodayUpdate(null);
     setIssues([]);
+    setActiveTab('update');
   };
 
   const handleSaveUpdate = async (payload: {
@@ -176,10 +177,10 @@ export function App() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {activeTab === 'policies' ? (
-          <Policies />
-        ) : !user ? (
+        {!user ? (
           <LoginView onSuccess={loadUserData} />
+        ) : activeTab === 'policies' ? (
+          <Policies />
         ) : (
           <>
             {/* Deadline banner is prominently visible across views */}

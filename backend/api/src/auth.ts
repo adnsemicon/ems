@@ -247,16 +247,16 @@ export async function upsertEmployee(db: D1Database, githubUser: {
     // Update existing profile details
     await db
       .prepare(
-        'UPDATE employees SET github_username = ?, name = ?, email = ?, role = ?, approval_status = ?, avatar_url = ?, updated_at = ? WHERE id = ?'
+        'UPDATE employees SET github_username = ?, email = ?, role = ?, approval_status = ?, avatar_url = ?, updated_at = ? WHERE id = ?'
       )
-      .bind(githubUser.login, githubUser.name, githubUser.email, role, approvalStatus, githubUser.avatar_url, now, existing.id)
+      .bind(githubUser.login, githubUser.email, role, approvalStatus, githubUser.avatar_url, now, existing.id)
       .run();
 
     return {
       id: existing.id,
       githubId: existing.github_id,
       githubUsername: githubUser.login,
-      name: githubUser.name,
+      name: existing.name,
       email: githubUser.email,
       officialEmail: existing.official_email || null,
       avatarUrl: githubUser.avatar_url,

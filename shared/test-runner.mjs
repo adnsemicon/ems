@@ -9,6 +9,7 @@ import {
   COMPANY_REPORT_CC,
 } from './validation.ts';
 import { prepareDailyReports } from '../backend/api/src/reports.ts';
+import { upsertEmployee } from '../backend/api/src/auth.ts';
 import { CAREER_LEVELS, isCareerLevel } from './types.ts';
 
 console.log('--- Running EMS Unit Tests ---');
@@ -60,7 +61,44 @@ assert.deepStrictEqual(
 assert.strictEqual(isCareerLevel('E12'), true);
 assert.strictEqual(isCareerLevel('E13'), false);
 
-// 5. Empty report dates should not prepare any emails
+// 5. OAuth refreshes should preserve the administrator-managed employee name
+console.log('Testing employee display-name preservation...');
+const existingProfile = {
+  id: 'emp-1',
+  github_id: 'github-1',
+  github_username: 'employee',
+  name: 'Preferred Display Name',
+  email: 'old@example.com',
+  official_email: 'employee@adnsemicon.com',
+  avatar_url: 'https://example.com/old-avatar.png',
+  team_id: null,
+  role: 'employee',
+  approval_status: 'approved',
+  level: 'E4',
+  created_at: '2026-01-01T00:00:00.000Z',
+  manager_name: null,
+};
+let employeeUpdateQuery = '';
+const employeeDb = {
+  prepare(query) {
+    if (query.startsWith('SELECT e.*')) {
+      return { bind: () => ({ first: async () => existingProfile }) };
+    }
+    employeeUpdateQuery = query;
+    return { bind: () => ({ run: async () => ({ success: true }) }) };
+  },
+};
+const refreshedEmployee = await upsertEmployee(employeeDb, {
+  id: 'github-1',
+  login: 'employee',
+  name: 'GitHub Account Name',
+  email: 'new@example.com',
+  avatar_url: 'https://example.com/new-avatar.png',
+});
+assert.strictEqual(refreshedEmployee.name, 'Preferred Display Name');
+assert.strictEqual(/\bname\s*=/.test(employeeUpdateQuery), false, 'OAuth refresh must not overwrite the display name');
+
+// 6. Empty report dates should not prepare any emails
 console.log('Testing empty daily report batches...');
 const emptyReportQueries = [];
 const emptyReportDb = {

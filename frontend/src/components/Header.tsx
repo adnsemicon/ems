@@ -1,6 +1,6 @@
 import React from 'react';
 import { Employee } from '@shared/types';
-import { LogOut, Users, Shield, Github, ExternalLink } from 'lucide-react';
+import { LogOut, Users, Shield, Github } from 'lucide-react';
 
 interface HeaderProps {
   user: Employee | null;
@@ -34,7 +34,8 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
+          {user && (
+            <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
               {user && (
                 <>
               <button
@@ -93,7 +94,8 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
               >
                 Policies
               </button>
-          </nav>
+            </nav>
+          )}
 
           {/* User Profile / Logout */}
           <div className="flex items-center gap-3">
@@ -137,23 +139,13 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
-            ) : (
-              <a
-                href="https://github.com/adnsemicon/ems"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900"
-              >
-                <Github className="w-4 h-4" />
-                <span className="hidden sm:inline">GitHub Repository</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-            )}
+            ) : null}
           </div>
         </div>
 
         {/* Mobile Nav Tabs */}
-        <div className="flex md:hidden overflow-x-auto py-2 border-t border-slate-100 space-x-1">
+        {user && (
+          <div className="flex md:hidden overflow-x-auto py-2 border-t border-slate-100 space-x-1">
             {user && (
               <>
             <button
@@ -202,7 +194,8 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
             >
               Policies
             </button>
-        </div>
+          </div>
+        )}
       </div>
     </header>
   );
