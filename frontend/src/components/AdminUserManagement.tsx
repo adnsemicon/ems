@@ -11,7 +11,7 @@ export const AdminUserManagement: React.FC = () => {
   const [notice, setNotice] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | Employee['role']>('all');
-  const [approvalFilter, setApprovalFilter] = useState<'all' | 'pending' | 'approved'>('all');
+  const [managerFilter, setManagerFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'name' | 'githubUsername' | 'role' | 'approvalStatus' | 'level'>('approvalStatus');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -41,9 +41,12 @@ export const AdminUserManagement: React.FC = () => {
           [employee.name, employee.githubUsername, employee.email, employee.officialEmail || '']
             .some(value => value.toLowerCase().includes(query));
         const matchesRole = roleFilter === 'all' || employee.role === roleFilter;
-        const matchesApproval =
-          approvalFilter === 'all' || (employee.approvalStatus || 'approved') === approvalFilter;
-        return matchesSearch && matchesRole && matchesApproval;
+        const matchesManager =
+          managerFilter === 'all' ||
+          (managerFilter === 'unassigned'
+            ? !employee.managerGithubUsername
+            : employee.managerGithubUsername?.toLowerCase() === managerFilter.toLowerCase());
+        return matchesSearch && matchesRole && matchesManager;
       })
       .sort((left, right) => {
         const getSortValue = (employee: Employee) => {
@@ -57,7 +60,7 @@ export const AdminUserManagement: React.FC = () => {
         });
         return sortDirection === 'asc' ? comparison : -comparison;
       });
-  }, [employees, search, roleFilter, approvalFilter, sortBy, sortDirection]);
+  }, [employees, search, roleFilter, managerFilter, sortBy, sortDirection]);
 
   const updateEmployee = (id: string, changes: Partial<Employee>) => {
     setEmployees(current =>
@@ -161,15 +164,22 @@ export const AdminUserManagement: React.FC = () => {
               </select>
             </label>
             <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-600">
-              Access
+              Managed by
               <select
-                value={approvalFilter}
-                onChange={event => setApprovalFilter(event.target.value as typeof approvalFilter)}
+                value={managerFilter}
+                onChange={event => setManagerFilter(event.target.value)}
                 className="rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-normal text-slate-800"
               >
-                <option value="all">All access states</option>
-                <option value="pending">Pending approval</option>
-                <option value="approved">Approved</option>
+                <option value="all">All managers</option>
+                <option value="unassigned">No manager</option>
+                {employees
+                  .filter(manager => manager.role === 'manager')
+                  .sort((left, right) => left.name.localeCompare(right.name))
+                  .map(manager => (
+                    <option key={manager.id} value={manager.githubUsername}>
+                      {manager.name} (@{manager.githubUsername})
+                    </option>
+                  ))}
               </select>
             </label>
             <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-600">
