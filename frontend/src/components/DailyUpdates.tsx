@@ -55,7 +55,7 @@ export const DailyUpdates: React.FC = () => {
           {result && (
             <p className="mt-1 text-sm text-slate-500">
               {result.date} · Your level: {result.viewerLevel}
-              {viewerDesignation ? ` (${viewerDesignation})` : ''}. Showing your level and below.
+              {viewerDesignation ? ` (${viewerDesignation})` : ''}. Showing your updates and updates from lower levels.
             </p>
           )}
         </div>
@@ -84,7 +84,7 @@ export const DailyUpdates: React.FC = () => {
         </div>
       ) : !error && result?.updates.length === 0 ? (
         <p role="status" className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
-          No daily updates are available for your level and below today.
+          No daily updates are available for you or employees at lower levels today.
         </p>
       ) : !error && result ? (
         <div className="space-y-4">
