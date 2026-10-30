@@ -180,6 +180,15 @@ export async function prepareDailyReports(
     .bind(date)
     .all<UpdateRow>();
 
+  if (rows.length === 0) {
+    return {
+      date,
+      timezone,
+      alreadySentCount: 0,
+      emailsToSend: [],
+    };
+  }
+
   // 4. Query already successfully delivered reports for idempotency
   const { results: deliveredRows } = await db
     .prepare(`SELECT report_type, recipient_email FROM report_deliveries WHERE date = ? AND status = 'sent'`)

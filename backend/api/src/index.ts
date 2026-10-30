@@ -10,6 +10,7 @@ import {
 } from './auth';
 import { fetchAssignedIssues } from './githubApp';
 import { prepareDailyReports, recordReportDelivery } from './reports';
+import { isCareerLevel } from '../../../shared/types';
 import {
   getDeadlineStatus,
   validateUpdateSections,
@@ -205,6 +206,7 @@ export default {
             avatarUrl: emp.avatar_url,
             teamId: emp.team_id,
             managerName: emp.manager_name,
+            level: emp.level,
             role: emp.role,
             approvalStatus: emp.approval_status,
             managerEmail: emp.manager_email,
@@ -243,6 +245,7 @@ export default {
               avatarUrl: emp.avatar_url,
               teamId: emp.team_id,
               managerGithubUsername: emp.manager_github_username,
+              level: emp.level,
               role: emp.role,
               approvalStatus: emp.approval_status,
               createdAt: emp.created_at,
@@ -317,6 +320,7 @@ export default {
               ? body.managerGithubUsername.trim()
               : undefined;
         const requestedRole = body.role;
+        const requestedLevel = body.level;
 
         if (!name || name.length > 120) {
           return errorResponse('Name is required and must be at most 120 characters.', 400, null, env, request);
@@ -333,6 +337,9 @@ export default {
         }
         if (!['employee', 'manager', 'admin'].includes(requestedRole)) {
           return errorResponse('Role must be employee, manager, or admin.', 400, null, env, request);
+        }
+        if (!isCareerLevel(requestedLevel)) {
+          return errorResponse('Level must be one of E1 through E12.', 400, null, env, request);
         }
 
         const target = await env.DB.prepare('SELECT github_username FROM employees WHERE id = ?')
@@ -392,10 +399,10 @@ export default {
 
         await env.DB.prepare(
           `UPDATE employees
-           SET name = ?, official_email = ?, team_id = ?, role = ?, updated_at = ?
+           SET name = ?, official_email = ?, team_id = ?, role = ?, level = ?, updated_at = ?
            WHERE id = ?`
         )
-          .bind(name, officialEmail, teamId, role, new Date().toISOString(), employeeId)
+          .bind(name, officialEmail, teamId, role, requestedLevel, new Date().toISOString(), employeeId)
           .run();
 
         if (role === 'manager') {
@@ -442,6 +449,7 @@ export default {
               avatarUrl: updated.avatar_url,
               teamId: updated.team_id,
               managerGithubUsername: updated.manager_github_username,
+              level: updated.level,
               role: updated.role,
               approvalStatus: updated.approval_status,
               createdAt: updated.created_at,
@@ -514,6 +522,73 @@ export default {
               createdAt: row.created_at,
               updatedAt: row.updated_at,
             },
+          },
+          200,
+          env,
+          request
+        );
+      }
+
+      if (url.pathname === '/api/updates/visible' && method === 'GET') {
+        const session = await authenticateRequest(request, env);
+        if (!session) {
+          return errorResponse('Unauthorized', 401, null, env, request);
+        }
+
+        const viewer = await env.DB.prepare(
+          `SELECT level FROM employees WHERE id = ? AND approval_status = 'approved'`
+        )
+          .bind(session.userId)
+          .first<{ level: string }>();
+
+        if (!viewer) {
+          return errorResponse('Employee profile not found.', 404, null, env, request);
+        }
+        if (!isCareerLevel(viewer.level)) {
+          return errorResponse('Your career level is not configured. Contact an administrator.', 500, null, env, request);
+        }
+
+        const currentDate = getDeadlineStatus(new Date(), timezone).currentDate;
+        const { results } = await env.DB.prepare(
+          `SELECT e.id AS employee_id, e.name AS employee_name, e.github_username, e.level,
+                  u.date, u.todays_tasks, u.sudden_tasks, u.blockers, u.plans_going_forward, u.status
+           FROM daily_updates u
+           JOIN employees e ON e.id = u.employee_id
+           WHERE u.date = ?
+             AND e.approval_status = 'approved'
+             AND CAST(SUBSTR(e.level, 2) AS INTEGER) <= ?
+           ORDER BY CAST(SUBSTR(e.level, 2) AS INTEGER) DESC, e.name COLLATE NOCASE ASC`
+        )
+          .bind(currentDate, Number(viewer.level.slice(1)))
+          .all<{
+            employee_id: string;
+            employee_name: string;
+            github_username: string;
+            level: string;
+            date: string;
+            todays_tasks: string;
+            sudden_tasks: string;
+            blockers: string;
+            plans_going_forward: string;
+            status: string;
+          }>();
+
+        return jsonResponse(
+          {
+            date: currentDate,
+            viewerLevel: viewer.level,
+            updates: results.map(row => ({
+              employeeId: row.employee_id,
+              employeeName: row.employee_name,
+              employeeGithubUsername: row.github_username,
+              level: row.level,
+              date: row.date,
+              todaysTasks: JSON.parse(row.todays_tasks || '[]'),
+              suddenTasks: JSON.parse(row.sudden_tasks || '[]'),
+              blockers: JSON.parse(row.blockers || '[]'),
+              plansGoingForward: JSON.parse(row.plans_going_forward || '[]'),
+              status: row.status,
+            })),
           },
           200,
           env,
@@ -683,12 +758,15 @@ export default {
         if (!session) return errorResponse('Unauthorized', 401, null, env, request);
 
         const employee = await env.DB.prepare(
-          'SELECT github_username, role FROM employees WHERE id = ?'
+          'SELECT github_username, role, level FROM employees WHERE id = ?'
         )
           .bind(session.userId)
-          .first<{ github_username: string; role: string }>();
+          .first<{ github_username: string; role: string; level: string }>();
         if (!employee || employee.role !== 'manager') {
           return errorResponse('Forbidden: Manager access required.', 403, null, env, request);
+        }
+        if (!isCareerLevel(employee.level)) {
+          return errorResponse('Your career level is not configured. Contact an administrator.', 500, null, env, request);
         }
 
         const team = await env.DB.prepare(
@@ -714,9 +792,10 @@ export default {
            LEFT JOIN daily_updates du
              ON du.employee_id = e.id AND du.date = ?
            WHERE e.team_id = ? AND e.approval_status = 'approved'
+             AND CAST(SUBSTR(e.level, 2) AS INTEGER) <= ?
            ORDER BY e.name COLLATE NOCASE ASC`
         )
-          .bind(date, team.id)
+          .bind(date, team.id, Number(employee.level.slice(1)))
           .all<any>();
 
         return jsonResponse(

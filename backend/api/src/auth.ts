@@ -1,5 +1,5 @@
 import { Env, UserSessionPayload } from './types';
-import { Employee } from '../../../shared/types';
+import { Employee, isCareerLevel } from '../../../shared/types';
 
 export const ADMIN_GITHUB_USERNAME = 'foez-ahmed';
 
@@ -240,6 +240,10 @@ export async function upsertEmployee(db: D1Database, githubUser: {
     normalizedLogin === ADMIN_GITHUB_USERNAME ? 'approved' : existing?.approval_status || 'pending';
 
   if (existing) {
+    if (!isCareerLevel(existing.level)) {
+      throw new Error('Employee career level is missing or invalid. Apply the employee-level migration.');
+    }
+
     // Update existing profile details
     await db
       .prepare(
@@ -258,6 +262,7 @@ export async function upsertEmployee(db: D1Database, githubUser: {
       avatarUrl: githubUser.avatar_url,
       teamId: existing.team_id,
       managerName: existing.manager_name,
+      level: existing.level,
       role,
       approvalStatus,
       createdAt: existing.created_at,
@@ -300,6 +305,7 @@ export async function upsertEmployee(db: D1Database, githubUser: {
     avatarUrl: githubUser.avatar_url,
     teamId,
     managerName,
+    level: 'E1',
     role,
     approvalStatus,
     createdAt: now,

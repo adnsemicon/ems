@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS employees (
   avatar_url TEXT,
   team_id TEXT REFERENCES teams(id) ON DELETE SET NULL,
   role TEXT NOT NULL DEFAULT 'employee', -- 'employee', 'manager', 'admin'
+  level TEXT NOT NULL DEFAULT 'E1' CHECK (level IN ('E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12')),
   approval_status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'approved'
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))

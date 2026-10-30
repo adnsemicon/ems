@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Employee } from '@shared/types';
+import { CAREER_LEVELS, Employee } from '@shared/types';
 import { api } from '../api';
 import { AlertCircle, Check, Loader2, Shield, Users } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export const AdminUserManagement: React.FC = () => {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | Employee['role']>('all');
   const [approvalFilter, setApprovalFilter] = useState<'all' | 'pending' | 'approved'>('all');
-  const [sortBy, setSortBy] = useState<'name' | 'githubUsername' | 'role' | 'approvalStatus'>('approvalStatus');
+  const [sortBy, setSortBy] = useState<'name' | 'githubUsername' | 'role' | 'approvalStatus' | 'level'>('approvalStatus');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const loadEmployees = useCallback(async () => {
@@ -183,6 +183,7 @@ export const AdminUserManagement: React.FC = () => {
                 <option value="name">Name</option>
                 <option value="githubUsername">GitHub username</option>
                 <option value="role">Role</option>
+                <option value="level">Level</option>
               </select>
             </label>
             <div className="flex flex-col gap-1 text-[11px] font-semibold text-slate-600">
@@ -201,7 +202,7 @@ export const AdminUserManagement: React.FC = () => {
             Showing {filteredEmployees.length} of {employees.length} employees
           </p>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-xs">
+            <table className="w-full min-w-[1120px] text-left text-xs">
               <thead className="bg-slate-50 text-slate-600 uppercase tracking-wide">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Employee</th>
@@ -209,6 +210,7 @@ export const AdminUserManagement: React.FC = () => {
                   <th className="px-4 py-3 font-semibold">Official email</th>
                   <th className="px-4 py-3 font-semibold">Manager</th>
                   <th className="px-4 py-3 font-semibold">Role</th>
+                  <th className="px-4 py-3 font-semibold">Level</th>
                   <th className="px-4 py-3 font-semibold">Access</th>
                   <th className="px-4 py-3 font-semibold">Action</th>
                 </tr>
@@ -216,7 +218,7 @@ export const AdminUserManagement: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {filteredEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                    <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                       No employees match these filters.
                     </td>
                   </tr>
@@ -284,6 +286,24 @@ export const AdminUserManagement: React.FC = () => {
                           {isAdmin && <option value="admin">Admin</option>}
                         </select>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        aria-label={`Career level for ${employee.githubUsername}`}
+                        value={employee.level}
+                        onChange={event =>
+                          updateEmployee(employee.id, {
+                            level: event.target.value as Employee['level'],
+                          })
+                        }
+                        className="w-48 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs focus:border-adn-500 focus:outline-none"
+                      >
+                        {CAREER_LEVELS.map(level => (
+                          <option key={level.value} value={level.value}>
+                            {level.value} — {level.designation}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex rounded-full px-2 py-1 font-semibold ${

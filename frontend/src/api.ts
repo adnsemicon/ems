@@ -1,4 +1,13 @@
-import { DeadlineStatus, Employee, GitHubIssueItem, DailyUpdate, Team, TeamMemberUpdate } from '@shared/types';
+import {
+  DeadlineStatus,
+  Employee,
+  GitHubIssueItem,
+  DailyUpdate,
+  Team,
+  TeamMemberUpdate,
+  CareerLevel,
+  VisibleDailyUpdate,
+} from '@shared/types';
 import { getDeadlineStatus } from '@shared/validation';
 
 const TOKEN_KEY = 'ems_auth_token';
@@ -111,6 +120,14 @@ export const api = {
     return request<{ exists: boolean; date: string; deadlineStatus: DeadlineStatus; update: DailyUpdate | null }>(`/api/updates/today${query}`);
   },
 
+  async getVisibleDailyUpdates(): Promise<{
+    date: string;
+    viewerLevel: CareerLevel;
+    updates: VisibleDailyUpdate[];
+  }> {
+    return request('/api/updates/visible');
+  },
+
   async saveTodayUpdate(payload: {
     date: string;
     todaysTasks: string[];
@@ -150,7 +167,7 @@ export const api = {
   },
 
   async updateAdminEmployee(
-    employee: Pick<Employee, 'id' | 'name' | 'officialEmail' | 'managerGithubUsername' | 'role'>
+    employee: Pick<Employee, 'id' | 'name' | 'officialEmail' | 'managerGithubUsername' | 'role' | 'level'>
   ): Promise<{ success: boolean; employee: Employee }> {
     return request<{ success: boolean; employee: Employee }>(
       `/api/admin/employees/${encodeURIComponent(employee.id)}`,
@@ -161,6 +178,7 @@ export const api = {
           officialEmail: employee.officialEmail || null,
           managerGithubUsername: employee.managerGithubUsername || null,
           role: employee.role,
+          level: employee.level,
         }),
       }
     );

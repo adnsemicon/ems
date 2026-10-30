@@ -4,8 +4,8 @@ import { LogOut, Users, Shield, Github, ExternalLink } from 'lucide-react';
 
 interface HeaderProps {
   user: Employee | null;
-  activeTab: 'update' | 'team' | 'admin' | 'policies';
-  setActiveTab: (tab: 'update' | 'team' | 'admin' | 'policies') => void;
+  activeTab: 'update' | 'daily-updates' | 'team' | 'admin' | 'policies';
+  setActiveTab: (tab: 'update' | 'daily-updates' | 'team' | 'admin' | 'policies') => void;
   onLogout: () => void;
 }
 
@@ -46,6 +46,16 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
                 }`}
               >
                 Today's Update
+              </button>
+              <button
+                onClick={() => setActiveTab('daily-updates')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'daily-updates'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                Daily Updates
               </button>
               {user.role === 'manager' && (
                 <button
@@ -92,6 +102,9 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
                 <div className="hidden sm:flex flex-col text-right">
                   <div className="flex items-center justify-end gap-1.5">
                     <span className="text-xs font-bold text-slate-800">{user.name}</span>
+                    <span className="text-[10px] font-semibold bg-adn-50 text-adn-700 px-1 rounded">
+                      {user.level}
+                    </span>
                     {user.role !== 'employee' && (
                       <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1 rounded">
                         {user.role === 'admin' ? 'Admin' : 'Manager'}
@@ -150,6 +163,14 @@ export const Header: React.FC<HeaderProps> = ({ user, activeTab, setActiveTab, o
               }`}
             >
               Today's Update
+            </button>
+            <button
+              onClick={() => setActiveTab('daily-updates')}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap ${
+                activeTab === 'daily-updates' ? 'bg-adn-600 text-white' : 'text-slate-600 bg-slate-100'
+              }`}
+            >
+              Daily Updates
             </button>
             {user.role === 'manager' && (
               <button

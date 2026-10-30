@@ -11,6 +11,7 @@ import {
   Zap,
   ShieldAlert,
   Compass,
+  Mail,
 } from 'lucide-react';
 
 interface UpdateFormProps {
@@ -220,6 +221,73 @@ export const UpdateForm: React.FC<UpdateFormProps> = ({
 
   return (
     <div className="space-y-5">
+      <section
+        aria-labelledby="email-preview-heading"
+        className="rounded-2xl border border-adn-200 bg-white p-5 shadow-xs sm:p-6"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="rounded-xl bg-adn-50 p-2 text-adn-700">
+              <Mail className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 id="email-preview-heading" className="text-sm font-bold text-slate-900">
+                Email preview
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Read-only copy of your latest saved update. This is the content used for the scheduled email.
+              </p>
+            </div>
+          </div>
+          <span className={`w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+            initialUpdate?.status === 'locked'
+              ? 'bg-emerald-100 text-emerald-800'
+              : initialUpdate
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-slate-100 text-slate-600'
+          }`}>
+            {initialUpdate?.status === 'locked'
+              ? 'Locked for email'
+              : initialUpdate
+                ? 'Latest saved draft'
+                : 'Not saved yet'}
+          </span>
+        </div>
+
+        {initialUpdate ? (
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            <p className="mb-4 text-xs font-medium text-slate-500">
+              Update date: <time dateTime={initialUpdate.date}>{initialUpdate.date}</time>
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { title: "Today's Tasks", items: initialUpdate.todaysTasks },
+                { title: 'Sudden Tasks', items: initialUpdate.suddenTasks },
+                { title: 'Blockers', items: initialUpdate.blockers },
+                { title: 'Plans Going Forward', items: initialUpdate.plansGoingForward },
+              ].map(section => (
+                <section key={section.title} aria-label={section.title}>
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-700">
+                    {section.title}
+                  </h3>
+                  {section.items.length > 0 ? (
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-5 text-slate-600">
+                      {section.items.map((item, index) => <li key={index}>{item}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="mt-2 text-sm italic text-slate-400">None</p>
+                  )}
+                </section>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="mt-4 border-t border-slate-100 pt-4 text-sm text-slate-500">
+            No update has been saved for today yet. Save your draft below to see the email preview here.
+          </p>
+        )}
+      </section>
+
       {/* Status Notice / Alert */}
       {statusMessage && (
         <div

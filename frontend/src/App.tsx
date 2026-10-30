@@ -9,6 +9,7 @@ import { TeamOverview } from './components/TeamOverview';
 import { LoginView } from './components/LoginView';
 import { AdminUserManagement } from './components/AdminUserManagement';
 import { Policies } from './components/Policies';
+import { DailyUpdates } from './components/DailyUpdates';
 
 export function App() {
   const [user, setUser] = useState<Employee | null>(null);
@@ -23,7 +24,7 @@ export function App() {
   } | null>(null);
   const [managerTeamError, setManagerTeamError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'update' | 'team' | 'admin' | 'policies'>('update');
+  const [activeTab, setActiveTab] = useState<'update' | 'daily-updates' | 'team' | 'admin' | 'policies'>('update');
   const [loading, setLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [issuesLoading, setIssuesLoading] = useState<boolean>(false);
@@ -220,6 +221,8 @@ export function App() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'daily-updates' && <DailyUpdates />}
 
             {/* Tab: Team Summary */}
             {activeTab === 'team' && user.role === 'manager' && (

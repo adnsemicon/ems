@@ -8,6 +8,8 @@ import {
   COMPANY_REPORT_TO,
   COMPANY_REPORT_CC,
 } from './validation.ts';
+import { prepareDailyReports } from '../backend/api/src/reports.ts';
+import { CAREER_LEVELS, isCareerLevel } from './types.ts';
 
 console.log('--- Running EMS Unit Tests ---');
 
@@ -48,5 +50,43 @@ console.log('Testing Company Report recipients...');
 assert.strictEqual(COMPANY_REPORT_TO, 'foez.ahmed@adnsemicon.com');
 assert.ok(COMPANY_REPORT_CC.includes('mohiuddin.reyad@adnsemicon.com'));
 assert.ok(COMPANY_REPORT_CC.includes('farhan.efty@adnsemicon.com'));
+
+// 4. Career level definitions and validation
+console.log('Testing career levels...');
+assert.deepStrictEqual(
+  CAREER_LEVELS.map(level => level.value),
+  ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12']
+);
+assert.strictEqual(isCareerLevel('E12'), true);
+assert.strictEqual(isCareerLevel('E13'), false);
+
+// 5. Empty report dates should not prepare any emails
+console.log('Testing empty daily report batches...');
+const emptyReportQueries = [];
+const emptyReportDb = {
+  prepare(query) {
+    emptyReportQueries.push(query);
+    return {
+      bind() {
+        return {
+          run: async () => ({ success: true }),
+          all: async () => ({ results: [] }),
+        };
+      },
+    };
+  },
+};
+const emptyBatch = await prepareDailyReports(
+  emptyReportDb,
+  '2020-01-01',
+  'Asia/Dhaka',
+  { DEV_SIGN_IN_ENABLED: 'false' }
+);
+assert.deepStrictEqual(emptyBatch.emailsToSend, [], 'An empty date should not generate emails');
+assert.strictEqual(
+  emptyReportQueries.some(query => query.includes('report_deliveries')),
+  false,
+  'An empty date should not create report delivery records'
+);
 
 console.log('All EMS unit tests passed successfully!');

@@ -2,6 +2,27 @@
  * Shared types for Employee Daily Update System (EMS)
  */
 
+export const CAREER_LEVELS = [
+  { value: 'E1', designation: 'Intern' },
+  { value: 'E2', designation: 'Trainee Engineer' },
+  { value: 'E3', designation: 'Junior Engineer' },
+  { value: 'E4', designation: 'Assistant Engineer' },
+  { value: 'E5', designation: 'Associate Engineer' },
+  { value: 'E6', designation: 'Engineer' },
+  { value: 'E7', designation: 'Senior Associate Engineer' },
+  { value: 'E8', designation: 'Senior Engineer' },
+  { value: 'E9', designation: 'Lead Engineer' },
+  { value: 'E10', designation: 'Principal Engineer' },
+  { value: 'E11', designation: 'Principal Architect' },
+  { value: 'E12', designation: 'Distinguished Engineer' },
+] as const;
+
+export type CareerLevel = (typeof CAREER_LEVELS)[number]['value'];
+
+export function isCareerLevel(value: unknown): value is CareerLevel {
+  return CAREER_LEVELS.some(level => level.value === value);
+}
+
 export interface Employee {
   id: string;
   githubId: string;
@@ -13,6 +34,7 @@ export interface Employee {
   teamId?: string | null;
   managerName?: string | null;
   managerGithubUsername?: string | null;
+  level: CareerLevel;
   role: 'employee' | 'manager' | 'admin';
   approvalStatus?: 'pending' | 'approved';
   createdAt?: string;
@@ -56,6 +78,15 @@ export interface TeamMemberUpdate extends UpdateSections {
   githubUsername: string;
   date: string | null;
   status: UpdateStatus | null;
+}
+
+export interface VisibleDailyUpdate extends UpdateSections {
+  employeeId: string;
+  employeeName: string;
+  employeeGithubUsername: string;
+  level: CareerLevel;
+  date: string;
+  status: UpdateStatus;
 }
 
 export interface DeadlineStatus {

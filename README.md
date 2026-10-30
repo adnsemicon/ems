@@ -62,7 +62,7 @@ The entire system is architected to operate on **100% ongoing free tiers**, with
 ```text
 ├── frontend/             # Static SPA deployed to GitHub Pages (React + Vite + Tailwind)
 │   ├── src/
-│   │   ├── components/   # Policy view and employee, team, and admin UI
+│   │   ├── components/   # Daily updates, policy, employee, team, and admin UI
 │   │   ├── api.ts        # Cloudflare Worker API client
 │   │   └── App.tsx       # State coordination and tab navigation
 │   ├── public/icon.png    # Official site and app icon
@@ -73,6 +73,7 @@ The entire system is architected to operate on **100% ongoing free tiers**, with
 ├── backend/
 │   └── api/              # Cloudflare Worker API & D1 integration
 │       ├── schema.sql    # D1 SQLite database tables & indices
+│       ├── migrations/   # Schema updates for existing D1 databases
 │       ├── src/
 │       │   ├── auth.ts       # GitHub OAuth exchange & HMAC-SHA256 JWT
 │       │   ├── githubApp.ts  # GitHub App RS256 token & GraphQL Project items
@@ -107,6 +108,8 @@ New GitHub accounts are created with pending access and cannot use the portal un
    - Update records are permanently deleted after every scheduled email for that date is confirmed sent. Failed or unconfirmed deliveries retain the records for retry; delivery audit records remain after deletion.
 3. **Next-Day Updates:**
    - Once reports are locked and dispatched, the system advances to the next date and opens a fresh update.
+4. **No-Update Dates:**
+   - If no employee has a saved update for a date, the dispatcher skips all email reports for that date. This avoids sending empty reports on weekends, holidays, or other non-working days.
 
 ### Required Form Sections
 
@@ -149,6 +152,12 @@ Individual copies are sent to each employee's official email when configured, wi
 
 The **My Team** view is available only to manager accounts. The API verifies the manager's current role and returns updates only for approved employees assigned to that manager's team.
 
+### Daily Update Visibility by Career Level
+
+The **Daily Updates** section lists saved updates for the current date. Employees can view their own updates and updates from employees at lower career levels. E12 is the highest level and can view updates from every level. The same level restriction is enforced by the API, including in the **My Team** view.
+
+Administrators assign each employee a level from **Manage Users**. Existing accounts receive E1 when the employee-level migration is applied; new accounts default to E1 until an administrator assigns their level.
+
 ### Combined Report Table Structure
 
 Combined reports contain employee name, GitHub ID, today's tasks, sudden tasks, blockers, and plans going forward.
@@ -182,6 +191,8 @@ npx wrangler d1 execute ems-db --remote --file=./schema.sql
 
 # For databases created before the approval feature, apply its migration once:
 # npx wrangler d1 execute ems-db --remote --file=./migrations/0003_employee_approval.sql
+# For existing databases, apply the employee-level migration after prior migrations:
+# npx wrangler d1 execute ems-db --remote --file=./migrations/0004_employee_level.sql
 
 # 6. Set worker secrets
 npx wrangler secret put GITHUB_CLIENT_ID
