@@ -85,8 +85,8 @@ export interface VisibleDailyUpdate extends UpdateSections {
   employeeName: string;
   employeeGithubUsername: string;
   level: CareerLevel;
-  date: string;
-  status: UpdateStatus;
+  date: string | null;
+  status: UpdateStatus | null;
 }
 
 export interface DeadlineStatus {

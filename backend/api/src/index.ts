@@ -511,12 +511,12 @@ export default {
             update: {
               id: row.id,
               employeeId: row.employee_id,
-              date: row.date,
-              todaysTasks: JSON.parse(row.todays_tasks || '[]'),
-              suddenTasks: JSON.parse(row.sudden_tasks || '[]'),
-              blockers: JSON.parse(row.blockers || '[]'),
-              plansGoingForward: JSON.parse(row.plans_going_forward || '[]'),
-              status: row.status,
+              date: row.date || null,
+              todaysTasks: row.todays_tasks ? JSON.parse(row.todays_tasks) : [],
+              suddenTasks: row.sudden_tasks ? JSON.parse(row.sudden_tasks) : [],
+              blockers: row.blockers ? JSON.parse(row.blockers) : [],
+              plansGoingForward: row.plans_going_forward ? JSON.parse(row.plans_going_forward) : [],
+              status: row.status || null,
               submittedAt: row.submitted_at,
               lockedAt: row.locked_at,
               createdAt: row.created_at,
@@ -552,10 +552,9 @@ export default {
         const { results } = await env.DB.prepare(
           `SELECT e.id AS employee_id, e.name AS employee_name, e.github_username, e.level,
                   u.date, u.todays_tasks, u.sudden_tasks, u.blockers, u.plans_going_forward, u.status
-           FROM daily_updates u
-           JOIN employees e ON e.id = u.employee_id
-           WHERE u.date = ?
-             AND e.approval_status = 'approved'
+           FROM employees e
+           LEFT JOIN daily_updates u ON u.employee_id = e.id AND u.date = ?
+           WHERE e.approval_status = 'approved'
              AND (
                e.id = ?
                OR CAST(SUBSTR(e.level, 2) AS INTEGER) < ?
@@ -568,12 +567,12 @@ export default {
             employee_name: string;
             github_username: string;
             level: string;
-            date: string;
-            todays_tasks: string;
-            sudden_tasks: string;
-            blockers: string;
-            plans_going_forward: string;
-            status: string;
+            date: string | null;
+            todays_tasks: string | null;
+            sudden_tasks: string | null;
+            blockers: string | null;
+            plans_going_forward: string | null;
+            status: string | null;
           }>();
 
         return jsonResponse(
@@ -585,12 +584,12 @@ export default {
               employeeName: row.employee_name,
               employeeGithubUsername: row.github_username,
               level: row.level,
-              date: row.date,
-              todaysTasks: JSON.parse(row.todays_tasks || '[]'),
-              suddenTasks: JSON.parse(row.sudden_tasks || '[]'),
-              blockers: JSON.parse(row.blockers || '[]'),
-              plansGoingForward: JSON.parse(row.plans_going_forward || '[]'),
-              status: row.status,
+              date: row.date || null,
+              todaysTasks: row.todays_tasks ? JSON.parse(row.todays_tasks) : [],
+              suddenTasks: row.sudden_tasks ? JSON.parse(row.sudden_tasks) : [],
+              blockers: row.blockers ? JSON.parse(row.blockers) : [],
+              plansGoingForward: row.plans_going_forward ? JSON.parse(row.plans_going_forward) : [],
+              status: row.status || null,
             })),
           },
           200,
