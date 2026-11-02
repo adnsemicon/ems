@@ -390,10 +390,26 @@ export default {
           } else {
             await env.DB.prepare(
               `INSERT INTO teams (id, name, manager_name, manager_email, manager_github_username)
-               VALUES (?, ?, ?, ?, ?)`
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(id) DO UPDATE SET
+                 name = excluded.name,
+                 manager_name = excluded.manager_name,
+                 manager_email = excluded.manager_email,
+                 manager_github_username = excluded.manager_github_username
+               WHERE lower(teams.manager_github_username) = lower(excluded.manager_github_username)`
             )
               .bind(teamId, manager.name, manager.name, managerEmail, manager.github_username)
               .run();
+
+            const resolvedTeam = await env.DB.prepare(
+              'SELECT id FROM teams WHERE lower(manager_github_username) = lower(?) ORDER BY created_at ASC LIMIT 1'
+            )
+              .bind(manager.github_username)
+              .first<{ id: string }>();
+            if (!resolvedTeam) {
+              return errorResponse('Unable to create a team for the selected manager.', 500, null, env, request);
+            }
+            teamId = resolvedTeam.id;
           }
         }
 
