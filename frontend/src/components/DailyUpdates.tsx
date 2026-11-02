@@ -76,7 +76,7 @@ export const DailyUpdates: React.FC = () => {
           {result && (
             <p className="mt-1 text-sm text-slate-500">
               {result.date} · Your level: {result.viewerLevel}
-              {viewerDesignation ? ` (${viewerDesignation})` : ''}. Showing your updates and updates from lower levels.
+              {viewerDesignation ? ` (${viewerDesignation})` : ''}. Showing all approved employees.
             </p>
           )}
         </div>
