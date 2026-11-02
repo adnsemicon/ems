@@ -43,8 +43,11 @@ export const DailyUpdates: React.FC = () => {
 
   const viewerDesignation = CAREER_LEVELS.find(level => level.value === result?.viewerLevel)?.designation;
 
+  const isSubmitted = (status: VisibleDailyUpdate['status']) =>
+    status === 'submitted' || status === 'locked';
+
   const submittedCount = useMemo(
-    () => result?.updates.filter(u => u.status !== null).length ?? 0,
+    () => result?.updates.filter(u => isSubmitted(u.status)).length ?? 0,
     [result?.updates]
   );
   const notSubmittedCount = useMemo(
@@ -55,10 +58,10 @@ export const DailyUpdates: React.FC = () => {
   const filteredUpdates = useMemo(() => {
     if (!result?.updates) return [];
     if (statusFilter === 'submitted') {
-      return result.updates.filter(u => u.status !== null);
+      return result.updates.filter(u => isSubmitted(u.status));
     }
     if (statusFilter === 'not-submitted') {
-      return result.updates.filter(u => u.status === null);
+      return result.updates.filter(u => !isSubmitted(u.status));
     }
     return result.updates;
   }, [result?.updates, statusFilter]);
@@ -169,7 +172,7 @@ export const DailyUpdates: React.FC = () => {
           ) : (
             filteredUpdates.map(update => {
               const designation = CAREER_LEVELS.find(level => level.value === update.level)?.designation;
-              const isSubmitted = update.status !== null;
+              const updateIsSubmitted = isSubmitted(update.status);
 
               return (
                 <article key={update.employeeId} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
@@ -182,7 +185,7 @@ export const DailyUpdates: React.FC = () => {
                       <span className="rounded-full bg-adn-50 px-2.5 py-1 text-xs font-semibold text-adn-800">
                         {update.level}{designation ? ` · ${designation}` : ''}
                       </span>
-                      {isSubmitted ? (
+                      {updateIsSubmitted ? (
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                           update.status === 'locked'
                             ? 'bg-slate-100 text-slate-700'
@@ -197,7 +200,7 @@ export const DailyUpdates: React.FC = () => {
                       )}
                     </div>
                   </header>
-                  {isSubmitted ? (
+                  {updateIsSubmitted ? (
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       {updateSections.map(section => {
                         const items = update[section.key];
@@ -219,7 +222,9 @@ export const DailyUpdates: React.FC = () => {
                     </div>
                   ) : (
                     <p className="mt-4 text-sm italic text-slate-400">
-                      No daily update saved for this date.
+                      {update.status === 'draft'
+                        ? 'Draft saved but not submitted.'
+                        : 'No daily update saved for this date.'}
                     </p>
                   )}
                 </article>

@@ -551,7 +551,8 @@ export default {
         const currentDate = getDeadlineStatus(new Date(), timezone).currentDate;
         const { results } = await env.DB.prepare(
           `SELECT e.id AS employee_id, e.name AS employee_name, e.github_username, e.level,
-                  u.date, u.todays_tasks, u.sudden_tasks, u.blockers, u.plans_going_forward, u.status
+                  u.date, u.todays_tasks, u.sudden_tasks, u.blockers, u.plans_going_forward,
+                  u.status, u.submitted_at
            FROM employees e
            LEFT JOIN daily_updates u ON u.employee_id = e.id AND u.date = ?
            WHERE e.approval_status = 'approved'
@@ -573,6 +574,7 @@ export default {
             blockers: string | null;
             plans_going_forward: string | null;
             status: string | null;
+            submitted_at: string | null;
           }>();
 
         return jsonResponse(
@@ -589,7 +591,7 @@ export default {
               suddenTasks: row.sudden_tasks ? JSON.parse(row.sudden_tasks) : [],
               blockers: row.blockers ? JSON.parse(row.blockers) : [],
               plansGoingForward: row.plans_going_forward ? JSON.parse(row.plans_going_forward) : [],
-              status: row.status || null,
+              status: row.status === 'locked' && !row.submitted_at ? 'draft' : row.status || null,
             })),
           },
           200,
