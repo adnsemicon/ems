@@ -555,9 +555,13 @@ export default {
            FROM employees e
            LEFT JOIN daily_updates u ON u.employee_id = e.id AND u.date = ?
            WHERE e.approval_status = 'approved'
+             AND (
+               e.id = ?
+               OR CAST(SUBSTR(e.level, 2) AS INTEGER) < ?
+             )
            ORDER BY CAST(SUBSTR(e.level, 2) AS INTEGER) DESC, e.name COLLATE NOCASE ASC`
         )
-          .bind(currentDate)
+          .bind(currentDate, session.userId, Number(viewer.level.slice(1)))
           .all<{
             employee_id: string;
             employee_name: string;
