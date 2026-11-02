@@ -377,9 +377,9 @@ export default {
           )
             .bind(manager.github_username)
             .first<{ id: string }>();
-          teamId = existingTeam?.id || `team-${manager.id}`;
           const managerEmail = manager.official_email?.trim() || manager.email;
           if (existingTeam) {
+            teamId = existingTeam.id;
             await env.DB.prepare(
               `UPDATE teams
                SET name = ?, manager_name = ?, manager_email = ?, manager_github_username = ?
@@ -388,17 +388,15 @@ export default {
               .bind(manager.name, manager.name, managerEmail, manager.github_username, teamId)
               .run();
           } else {
+            const newTeamId = `team-${crypto.randomUUID()}`;
             await env.DB.prepare(
               `INSERT INTO teams (id, name, manager_name, manager_email, manager_github_username)
-               VALUES (?, ?, ?, ?, ?)
-               ON CONFLICT(id) DO UPDATE SET
-                 name = excluded.name,
-                 manager_name = excluded.manager_name,
-                 manager_email = excluded.manager_email,
-                 manager_github_username = excluded.manager_github_username
-               WHERE lower(teams.manager_github_username) = lower(excluded.manager_github_username)`
+               SELECT ?, ?, ?, ?, ?
+               WHERE NOT EXISTS (
+                 SELECT 1 FROM teams WHERE lower(manager_github_username) = lower(?)
+               )`
             )
-              .bind(teamId, manager.name, manager.name, managerEmail, manager.github_username)
+              .bind(newTeamId, manager.name, manager.name, managerEmail, manager.github_username, manager.github_username)
               .run();
 
             const resolvedTeam = await env.DB.prepare(
