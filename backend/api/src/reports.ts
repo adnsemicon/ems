@@ -152,13 +152,13 @@ export async function prepareDailyReports(
     );
   }
 
-  // 2. Lock submitted updates; drafts remain unsubmitted.
+  // 2. Lock any unlocked updates for this date
   const now = new Date().toISOString();
   await db
     .prepare(
       `UPDATE daily_updates
        SET status = 'locked', locked_at = ?
-       WHERE date = ? AND status = 'submitted'`
+       WHERE date = ? AND status != 'locked'`
     )
     .bind(now, date)
     .run();
@@ -175,7 +175,6 @@ export async function prepareDailyReports(
        JOIN employees e ON u.employee_id = e.id
        LEFT JOIN teams t ON e.team_id = t.id
        WHERE u.date = ?
-         AND (u.status = 'submitted' OR (u.status = 'locked' AND u.submitted_at IS NOT NULL))
        ORDER BY t.manager_name ASC, e.name ASC`
     )
     .bind(date)
