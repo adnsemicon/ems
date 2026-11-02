@@ -287,6 +287,38 @@ export default {
         return jsonResponse({ success: true, approvalStatus: 'approved' }, 200, env, request);
       }
 
+      if (url.pathname.startsWith('/api/admin/employees/') && method === 'DELETE') {
+        const session = await authenticateRequest(request, env);
+        if (!session) return errorResponse('Unauthorized', 401, null, env, request);
+        if (!(await isAdminSession(session, env))) {
+          return errorResponse('Forbidden: Administrator access required.', 403, null, env, request);
+        }
+
+        const employeeId = url.pathname.slice('/api/admin/employees/'.length);
+        if (!employeeId || employeeId.includes('/')) {
+          return errorResponse('Invalid employee profile path.', 400, null, env, request);
+        }
+
+        const target = await env.DB.prepare('SELECT github_username FROM employees WHERE id = ?')
+          .bind(employeeId)
+          .first<{ github_username: string }>();
+        if (!target) return errorResponse('Employee profile not found.', 404, null, env, request);
+        if (
+          employeeId === session.userId ||
+          target.github_username.toLowerCase() === ADMIN_GITHUB_USERNAME
+        ) {
+          return errorResponse('The administrator account cannot be deleted.', 403, null, env, request);
+        }
+
+        await env.DB.batch([
+          env.DB.prepare('DELETE FROM teams WHERE lower(manager_github_username) = lower(?)')
+            .bind(target.github_username),
+          env.DB.prepare('DELETE FROM employees WHERE id = ?').bind(employeeId),
+        ]);
+
+        return jsonResponse({ success: true }, 200, env, request);
+      }
+
       if (url.pathname.startsWith('/api/admin/employees/') && method === 'PUT') {
         const session = await authenticateRequest(request, env);
         if (!session) return errorResponse('Unauthorized', 401, null, env, request);

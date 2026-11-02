@@ -166,6 +166,13 @@ export const api = {
     );
   },
 
+  async deleteAdminEmployee(employeeId: string): Promise<{ success: boolean }> {
+    return request<{ success: boolean }>(
+      `/api/admin/employees/${encodeURIComponent(employeeId)}`,
+      { method: 'DELETE' }
+    );
+  },
+
   async updateAdminEmployee(
     employee: Pick<Employee, 'id' | 'name' | 'officialEmail' | 'managerGithubUsername' | 'role' | 'level'>
   ): Promise<{ success: boolean; employee: Employee }> {

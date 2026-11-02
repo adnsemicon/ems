@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CAREER_LEVELS, Employee } from '@shared/types';
 import { api } from '../api';
-import { AlertCircle, Check, Loader2, Shield, Users } from 'lucide-react';
+import { AlertCircle, Check, Loader2, Shield, Trash2, Users } from 'lucide-react';
 
 export const AdminUserManagement: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -100,6 +100,26 @@ export const AdminUserManagement: React.FC = () => {
       setNotice(`Approved ${employee.name}'s account.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to approve employee account.');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const deleteEmployee = async (employee: Employee) => {
+    const confirmed = window.confirm(
+      `Permanently delete ${employee.name} (@${employee.githubUsername})? Their daily updates will also be deleted. If they manage a team, its members will be unassigned.`
+    );
+    if (!confirmed) return;
+
+    setSavingId(employee.id);
+    setError(null);
+    setNotice(null);
+    try {
+      await api.deleteAdminEmployee(employee.id);
+      setEmployees(current => current.filter(item => item.id !== employee.id));
+      setNotice(`Deleted ${employee.name}'s account.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete employee account.');
     } finally {
       setSavingId(null);
     }
@@ -347,6 +367,21 @@ export const AdminUserManagement: React.FC = () => {
                             className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Approve
+                          </button>
+                        )}
+                        {!isAdmin && (
+                          <button
+                            type="button"
+                            disabled={savingId !== null}
+                            onClick={() => deleteEmployee(employee)}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {savingId === employee.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3.5 h-3.5" />
+                            )}
+                            Delete
                           </button>
                         )}
                       </div>
